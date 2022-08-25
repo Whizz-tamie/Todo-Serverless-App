@@ -15,15 +15,15 @@ export class AttachmentUtils {
       private readonly urlExpiration = parseInt(process.env.SIGNED_URL_EXPIRATION)
     ) {}
   
-    async getAttachmentUrl(attachmentId: string): Promise<string> {
-        const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${attachmentId}`
-        return attachmentUrl
-    }
-  
-    async getUploadUrl(attachmentId: string): Promise<string> {
+    async getAttachmentUrl(todoId: string): Promise<string> {
+      const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${todoId}`
+      return attachmentUrl
+  }   
+
+    async getUploadUrl(todoId: string): Promise<string> {
       const uploadUrl = this.s3.getSignedUrl('putObject', {
         Bucket: this.bucketName,
-        Key: attachmentId,
+        Key: todoId,
         Expires: this.urlExpiration
       })
       return uploadUrl

@@ -42,7 +42,7 @@ export async function createTodo(userId: string, createTodoRequest: CreateTodoRe
 export async function updateTodo(userId: string, todoId: string, updateTodoRequest: UpdateTodoRequest) {
   logger.info(`Updating todo ${todoId} for user ${userId}`, { userId, todoId, todoUpdate: updateTodoRequest })
 
-  const item = await todosAccess.getTodoItem(todoId)
+  const item = await todosAccess.getTodoItem(userId, todoId)
 
   if (!item)
     throw new Error('Item not found')  // FIXME: 404?
@@ -52,33 +52,23 @@ export async function updateTodo(userId: string, todoId: string, updateTodoReque
     throw new Error('User is not authorized to update item')  // FIXME: 403?
   }
 
-  todosAccess.updateTodoItem(todoId, updateTodoRequest as TodoUpdate)
+  todosAccess.updateTodoItem(todoId, updateTodoRequest as TodoUpdate, userId)
 }
 
-export async function deleteTodo(userId: string, todoId: string) {
+export async function deleteTodo(todoId: string, userId: string) {
   logger.info(`Deleting todo ${todoId} for user ${userId}`, { userId, todoId })
 
-  const item = await todosAccess.getTodoItem(todoId)
-
-  if (!item)
-    throw new Error('Item not found')  // FIXME: 404?
-
-  if (item.userId !== userId) {
-    logger.error(`User ${userId} does not have permission to delete todo ${todoId}`)
-    throw new Error('User is not authorized to delete item')  // FIXME: 403?
-  }
-
-  todosAccess.deleteTodoItem(todoId)
+  todosAccess.deleteTodoItem(todoId, userId)
 }
 
-export async function updateAttachmentUrl(userId: string, todoId: string, attachmentId: string) {
-  logger.info(`Generating attachment URL for attachment ${attachmentId}`)
+export async function updateAttachmentUrl(userId: string, todoId: string) {
+  logger.info(`Generating attachment URL for attachment ${todoId}`)
 
-  const attachmentUrl = await attachmentUtils.getAttachmentUrl(attachmentId)
+  const attachmentUrl = await attachmentUtils.getAttachmentUrl(todoId)
 
   logger.info(`Updating todo ${todoId} with attachment URL ${attachmentUrl}`, { userId, todoId })
 
-  const item = await todosAccess.getTodoItem(todoId)
+  const item = await todosAccess.getTodoItem(userId, todoId)
 
   if (!item)
     throw new Error('Item not found')  // FIXME: 404?
@@ -88,13 +78,13 @@ export async function updateAttachmentUrl(userId: string, todoId: string, attach
     throw new Error('User is not authorized to update item')  // FIXME: 403?
   }
 
-  await todosAccess.updateAttachmentUrl(todoId, attachmentUrl)
+  await todosAccess.updateAttachmentUrl(userId, todoId, attachmentUrl)
 }
 
-export async function createAttachmentPresignedUrl(attachmentId: string): Promise<string> {
-  logger.info(`Generating upload URL for attachment ${attachmentId}`)
+export async function createUrl(todoId: string): Promise<string> {
+  logger.info(`Generating upload URL for attachment ${todoId}`)
 
-  const uploadUrl = await attachmentUtils.getUploadUrl(attachmentId)
+  const uploadUrl = await attachmentUtils.getUploadUrl(todoId)
 
   return uploadUrl
 }
